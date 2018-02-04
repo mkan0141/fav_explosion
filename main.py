@@ -9,6 +9,13 @@ def userInput():
     favNum = min(favNum, 30)
     return userID, favNum
 
+def enableFavorite(tweet):
+    if tweet['text'][0] == 'R' and tweet['text'][1] == 'T' and tweet['text'][2] == ' ' and tweet['text'][3] == '@':
+        return False
+    if tweet['retweeted'] == True or tweet['text'][0] == '@' or tweet['favorited'] == True:
+        return False
+    return True
+
 def main():
     userID,favNum = userInput()
     
@@ -16,30 +23,15 @@ def main():
     timelines = twitter.statuses.user_timeline(screen_name = userID,count = 200)
     
     cnt = 0
-    for timeline in timelines:
+    for tweet in timelines:
         if cnt == favNum:
-            break
-        
-        """print(timeline['id'])"""
-
-        if len(timeline['text']) > 4:
-            if timeline['text'][0] == 'R' and timeline['text'][1] == 'T' and timeline['text'][2] == ' ' and timeline['text'][3] == '@':
-                continue
-
-        if timeline['retweeted'] == False and timeline['text'][0] != '@' and timeline['favorited'] == False:
-            twitter.favorites.create(_id = timeline['id'], entities = False)
-            print("tweet id " + str(timeline['id']) + " favorite.")
+            break        
+        if enableFavorite(tweet) == True:
+            twitter.favorites.create(_id = tweet['id'], entities = False)
+            print("tweet id " + str(tweet['id']) + " liked.")
             cnt+=1
 
-        """ debug用
-        else:
-            if timeline['retweeted'] == True:
-                print("false: this tweet is retweeted.")
-            if timeline['text'][0] == '@':
-                print("false: this tweet is reply.")
-            if timeline['favorited'] == True:
-                print("false: this tweet has been favorite")
-        """
+    print('total ' + str(cnt) + ' liked')
 
 if __name__ == '__main__':
     main()
